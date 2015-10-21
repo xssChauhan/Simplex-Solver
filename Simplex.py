@@ -1,18 +1,11 @@
 
 from __future__ import division
 import time
+from PrintTable import PrintTable
+
+table = PrintTable()
 
 def pivot(N,B,A,b,c,v,l,e):
-	print '________________________'
-	print 'From Pivot'
-	print 'A :', A
-	print 'N :', N
-	print 'B :', B
-	print 'b :', b
-	print 'c :', c
-	print 'v :', v
-	print 'l :', l
-	print 'e :', e
 	Anew = dict()
 	bnew = dict()
 	cnew = dict()
@@ -49,7 +42,6 @@ def pivot(N,B,A,b,c,v,l,e):
 	#Compute the new sets of basic and nonbasic variables
 	N.append(l)
 	B.append(e)
-	print '________________________'
 	return (N, B, Anew, bnew, cnew, vdash)
 
 
@@ -66,7 +58,6 @@ def minDict(d):
 	for i,e in d.iteritems():
 		if e < min: 
 			min = e
-			print 'min :' ,min
 			index = i
 	return index
 def maxDict(d):
@@ -78,29 +69,28 @@ def maxDict(d):
 			index = i
 	return index
 def Simplex(N,B,A,b,c,v):
-	v1 = v
+	z = c
+	table.makeTable(N,B,A,b,c,v,z)
 	while findFlag(c):
-		print '		___________'
-		print 'From Simplex'
 		delta = dict()
-		print 'c :', c
-		e = maxDict(c)
-		print 'e : ' , e
+		e = maxDict(c) #Optimality Condition
 		for i in B:
-			#print 'i: ' ,i
-			if A[i][e] > 0:
-				delta[i] = b[i]/A[i][e]
-			else: delta[i] = float('inf')
-		print 'delta: ',delta
-		l = minDict(delta)
-		print'		___________'
-		if delta[l] == float('inf'):
-			return 'Unbounded'
-		else:
-			(N,B,A,b,c,v) = pivot(N,B,A,b,c,v,l,e)
+			try:
+				if A[i][e] > 0:
+					delta[i] = b[i]/A[i][e]
+				else: delta[i] = float('inf')
+			except Exception as e:
+				pass
+		l = minDict(delta) #Feasibility Condition
+		try:
+			if delta[l] == float('inf'):
+				return 'Unbounded'
+			else:
 
-	for e in (N,B,A,b,c,v):
-		print e
+				(N,B,A,b,c,v) = pivot(N,B,A,b,c,v,l,e)
+				table.makeTable(N,B,A,b,c,v,z)
+		except Exception as e:
+			pass
 
 def PivotingTrial(N,B,A,b,c,v,l,e):
 	(N,B,A,b,c,v) = pivot(N,B,A,b,c,v,l,e)
@@ -109,18 +99,29 @@ def PivotingTrial(N,B,A,b,c,v,l,e):
 		print e
 
 if __name__ == '__main__':
-	N = [1,2,3]
-	B = [4,5,6]
-	v=  0
-	l = 6
-	e = 1
-	A = {4: {1: 1, 2: 1, 3: 3}, 5: {1: 2, 2: 2, 3: 5}, 6: {1: 4, 2: 1, 3: 2}}
-	b = {4:30,5:24,6:36}
-	c = {1:3,2:1,3:2}
-	t0 = time.clock()
+	print 'Input the number of Variables'
+	n = input()
+	print 'Input the number of Equations'
+	m = input()
+	N = [i for i in range(1,n+1)]
+	B = [n+j for j in range(1,m+1)]
+	v =  0
+	A = dict()
+	b = dict()
+	c = dict()
+	print 'Enter the coefficient Matrix'
+	for i in B:
+		A[i] = dict()
+		for j in N:
+			A[i][j] = input()
+	print 'Enter the B matrix'
+	for i in B:
+		b[i] = input()
+	print 'Enter the coefficients of the objective function in the order of entry of the variables'
+	for i in N:
+		c[i] = input()
 	Simplex(N,B,A,b,c,v)
 	#PivotingTrial(N,B,A,b,c,v,l,e)
-	print time.clock() - t0
 
 
 
